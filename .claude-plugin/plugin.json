@@ -1,0 +1,20 @@
+{
+  "name": "claudikins-namer",
+  "version": "0.1.0",
+  "description": "Brand name generation pipeline with AI-powered validation and scoring",
+  "author": {
+    "name": "elb-pr",
+    "email": "elb.pr.contact@gmail.com"
+  },
+  "homepage": "https://github.com/elb-pr/claudikins-namer",
+  "repository": "https://github.com/elb-pr/claudikins-namer",
+  "license": "MIT",
+  "keywords": [
+    "naming",
+    "branding",
+    "generation",
+    "validation",
+    "claudikins",
+    "claude-code"
+  ]
+}

@@ -63,7 +63,8 @@ This disclaimer is non-negotiable. AI cultural analysis is a useful first pass b
 ```json
 {
   "name": "BrandName",
-  "cultural_status": "clear|warning|flag",
+  "status": "clear|warning|flag",
+  "confidence": "ai-assessed",
   "issues": [
     {
       "language": "Spanish",
@@ -75,4 +76,4 @@ This disclaimer is non-negotiable. AI cultural analysis is a useful first pass b
 }
 ```
 
-When no issues are found, the `issues` array should be empty and `cultural_status` should be `"clear"`.
+When no issues are found, the `issues` array should be empty and `status` should be `"clear"`. The `confidence` field is always `"ai-assessed"` for cultural checks.

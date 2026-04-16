@@ -23,7 +23,7 @@ curl -s -o /dev/null -w "%{http_code}" https://rdap.org/domain/xyznotreal123.com
 
 ### Coverage
 
-RDAP covers .com, .org, .net, .io and most major TLDs. Coverage depends on the registry supporting RDAP, which most major registries now do.
+RDAP covers .com, .org, .net and most major TLDs. Coverage depends on the registry supporting RDAP, which most major registries now do. Note: .io RDAP support has been inconsistent historically — expect DNS fallback for .io queries.
 
 ## Fallback: DNS Lookup
 
@@ -69,8 +69,11 @@ RDAP request →
   "domain": "example.com",
   "status": "available|taken|error",
   "method": "rdap|dns",
+  "confidence": "verified|partial|unchecked",
   "checked_at": "ISO timestamp"
 }
 ```
+
+Confidence mapping: `rdap` → `verified`, `dns` → `partial`, error → `unchecked`.
 
 Each TLD produces its own result object. A complete domain check returns an array of these objects.

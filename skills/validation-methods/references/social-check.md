@@ -65,7 +65,7 @@ Select platforms based on the target market specified in the naming brief.
 ### Japan (add to global)
 
 - LINE
-- Mixi
+- note.com
 
 If the target market is not specified in the brief, ask the user before running social checks. Platform selection directly affects which handles matter.
 
@@ -76,8 +76,11 @@ If the target market is not specified in the brief, ask the user before running 
   "platform": "twitter",
   "handle": "@example",
   "status": "available|taken|unchecked",
-  "method": "apify|manual-required"
+  "method": "apify|manual-required",
+  "confidence": "verified|unchecked"
 }
 ```
+
+Confidence mapping: `apify` → `verified`, `manual-required` → `unchecked`.
 
 Each platform produces its own result object. A complete social check returns an array of these objects, one per platform.

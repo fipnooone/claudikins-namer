@@ -104,7 +104,7 @@ This directly impacts word-of-mouth growth and search discoverability.
 
 ### Missing Sounds
 
-- The **"SH"** sound does not exist in many languages (Spanish, Italian, Dutch)
+- The **"SH"** sound does not exist in many languages (Spanish, Italian, Arabic)
 - The **"TH"** sound (as in "the") is rare outside English and Greek
 - The **"R"** sound varies dramatically — French uvular, Spanish trilled, Japanese approximant
 - The **"V"** sound does not exist in many East Asian languages

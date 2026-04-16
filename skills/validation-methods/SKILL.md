@@ -42,11 +42,12 @@ If the search returns tools, use MCP-based methods (primary path). If it errors 
 
 Every validation result carries a confidence level:
 
-| Level         | Meaning                           | When Used                                                                          |
-| ------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
-| **verified**  | Full programmatic check completed | MCP tool returned a definitive result, or RDAP/DNS returned a clear answer         |
-| **partial**   | Limited check completed           | Fallback method used (e.g., WebSearch instead of Gemini, DNS instead of RDAP)      |
-| **unchecked** | No check was possible             | MCP unavailable and no reliable fallback exists (e.g., social media without Apify) |
+| Level           | Meaning                           | When Used                                                                          |
+| --------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| **verified**    | Full programmatic check completed | MCP tool returned a definitive result, or RDAP/DNS returned a clear answer         |
+| **ai-assessed** | AI reasoning, no external check   | Opus AI analysis (cultural check) — always available but not programmatic          |
+| **partial**     | Limited check completed           | Fallback method used (e.g., WebSearch instead of Gemini, DNS instead of RDAP)      |
+| **unchecked**   | No check was possible             | MCP unavailable and no reliable fallback exists (e.g., social media without Apify) |
 
 ## Fallback Chain
 
@@ -62,7 +63,7 @@ MCP available?
     ├── SEO: WebSearch fallback (if available)
     │   Confidence: partial
     └── Cultural: Opus AI analysis (no external tools needed)
-        Confidence: verified (AI-based, always available)
+        Confidence: ai-assessed (always available, not programmatic)
 ```
 
-The cultural check always runs at full confidence since it relies on Opus AI reasoning, not external services.
+The cultural check always runs since it relies on Opus AI reasoning, not external services. Its confidence is "ai-assessed" rather than "verified" because AI analysis is not a programmatic check — see the mandatory disclaimer in [cultural-check.md](references/cultural-check.md).

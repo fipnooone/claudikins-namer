@@ -6,8 +6,12 @@ The most reliable way to assess SEO uniqueness is through the Gemini Google Sear
 
 ### How to Use
 
+Follow the standard tool-executor workflow:
+
 ```
-search_tools("google search")
+1. search_tools("google search") → find the Gemini search tool
+2. get_tool_schema(<tool_id from step 1>) → get exact input parameters
+3. execute_code(<tool_id>, { query: "\"BrandName\"" }) → run the search
 ```
 
 This returns Gemini-based tools that can perform Google searches and return structured results.

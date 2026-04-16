@@ -6,11 +6,15 @@ The reliable way to check social media handle availability is through the Apify 
 
 ### How to Use
 
+Follow the standard tool-executor workflow:
+
 ```
-search_tools("username availability checker")
+1. search_tools("username availability checker") → find the Apify tool
+2. get_tool_schema(<tool_id from step 1>) → get exact input parameters
+3. execute_code(<tool_id>, { ...parameters }) → run the check
 ```
 
-This returns Apify-based tools that can check username availability across 80+ platforms. The Apify actor handles rate limiting, captchas, and platform-specific quirks.
+The Apify actor handles rate limiting, captchas, and platform-specific quirks. It can check username availability across 80+ platforms.
 
 ### Why MCP Is Required
 

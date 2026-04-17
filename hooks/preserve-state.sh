@@ -6,7 +6,7 @@
 # Exit codes:
 #   0 - Always (capture only, never blocks)
 
-set -euo pipefail
+set -uo pipefail
 
 # Get project directory
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"

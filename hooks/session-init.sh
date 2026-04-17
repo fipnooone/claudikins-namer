@@ -26,7 +26,7 @@ mkdir -p "$CLAUDE_DIR/namer-outputs/names"
 
 # Create namer-state.json if it doesn't exist
 if [ ! -f "$STATE_FILE" ]; then
-    cat > "$STATE_FILE" <<EOF
+    cat > "${STATE_FILE}.tmp" <<EOF
 {
   "session_id": "${SESSION_ID}",
   "started_at": "${TIMESTAMP}",
@@ -37,6 +37,7 @@ if [ ! -f "$STATE_FILE" ]; then
   "names_validated": 0
 }
 EOF
+    mv "${STATE_FILE}.tmp" "$STATE_FILE"
 else
     # Read existing session_id
     SESSION_ID=$(jq -r '.session_id // "unknown"' "$STATE_FILE")

@@ -39,8 +39,7 @@ mkdir -p "$NAMES_DIR"
 NAMES_OUTPUT=""
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     # Extract the last JSON block that contains "strategy" and "names" fields
-    NAMES_OUTPUT=$(cat "$TRANSCRIPT_PATH" | \
-        grep -o '{[^}]*"strategy"[^}]*"names"[^}]*}' | \
+    NAMES_OUTPUT=$(grep -o '{[^}]*"strategy"[^}]*"names"[^}]*}' "$TRANSCRIPT_PATH" | \
         tail -1 || echo "")
 
     # If simple grep didn't work, try extracting larger JSON blocks
@@ -48,7 +47,7 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
         NAMES_OUTPUT=$(python3 -c "
 import sys, json, re
 
-text = open('$TRANSCRIPT_PATH').read()
+text = open(sys.argv[1]).read()
 # Find all JSON-like blocks
 blocks = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text)
 result = ''
@@ -61,7 +60,7 @@ for block in reversed(blocks):
     except:
         pass
 print(result)
-" 2>/dev/null || echo "")
+" "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
     fi
 fi
 

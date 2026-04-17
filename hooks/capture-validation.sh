@@ -46,7 +46,7 @@ if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
     VALIDATION_OUTPUT=$(python3 -c "
 import sys, json, re
 
-text = open('$TRANSCRIPT_PATH').read()
+text = open(sys.argv[1]).read()
 blocks = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text)
 result = ''
 for block in reversed(blocks):
@@ -58,7 +58,7 @@ for block in reversed(blocks):
     except:
         pass
 print(result)
-" 2>/dev/null || echo "")
+" "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
 fi
 
 # If no structured output found, create a basic record

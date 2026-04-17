@@ -67,7 +67,7 @@ Select platforms based on the target market specified in the naming brief.
 - LINE
 - note.com
 
-If the target market is not specified in the brief, ask the user before running social checks. Platform selection directly affects which handles matter.
+If the target market is not specified in the brief, default to Global platforms. Background agents cannot ask users interactively, so a sensible default avoids blocking the pipeline.
 
 ## Output Format
 

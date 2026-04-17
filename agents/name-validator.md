@@ -24,7 +24,7 @@ description: |
   </example>
 
 model: sonnet
-permissionMode: acceptEdits
+permissionMode: plan
 color: blue
 status: stable
 background: true
@@ -39,6 +39,11 @@ tools:
   - mcp__plugin_claudikins-tool-executor_tool-executor__search_tools
   - mcp__plugin_claudikins-tool-executor_tool-executor__get_tool_schema
   - mcp__plugin_claudikins-tool-executor_tool-executor__execute_code
+disallowedTools:
+  - Edit
+  - Write
+  - Task
+  - TodoWrite
 ---
 
 # Brand Name Validator
@@ -192,13 +197,15 @@ Output JSON that will be captured by the SubagentStop hook:
             "domain": "vexora.com",
             "status": "available",
             "method": "rdap",
-            "confidence": "verified"
+            "confidence": "verified",
+            "checked_at": "ISO timestamp"
           },
           {
             "domain": "vexora.io",
             "status": "taken",
             "method": "rdap",
-            "confidence": "verified"
+            "confidence": "verified",
+            "checked_at": "ISO timestamp"
           }
         ]
       },
@@ -221,8 +228,9 @@ Output JSON that will be captured by the SubagentStop hook:
         ]
       },
       "seo": {
-        "score": 9,
+        "seo_score": 9,
         "results_count": 23,
+        "top_competitors": ["unrelated site 1", "unrelated site 2"],
         "method": "gemini",
         "confidence": "verified"
       }

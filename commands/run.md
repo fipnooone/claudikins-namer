@@ -19,6 +19,14 @@ allowed-tools:
 skills:
   - naming-strategies
   - validation-methods
+agent_outputs:
+  - agent: name-crafter
+    capture_to: .claude/namer-outputs/names/
+    merge_strategy: jq -s 'add'
+  - agent: name-validator
+    capture_to: .claude/namer-outputs/
+  - agent: brand-reporter
+    capture_to: .claude/namer-outputs/
 output-schema:
   type: object
   properties:
@@ -71,11 +79,13 @@ Parse flags from the argument string before entering Phase 0.
      > "No brief found. Run `/namer:brief` first to create one."
 
 2. **Validate brief JSON** — confirm required fields exist:
-   - `project_name`
-   - `description`
-   - `strategies_selected`
-   - `constraints`
    - `session_id`
+   - `product` (with `description` and `industry`)
+   - `audience`
+   - `market`
+   - `tone`
+   - `constraints`
+   - `strategies_selected`
 
    If any required field is missing, report which fields are absent and stop.
 
@@ -173,7 +183,7 @@ Parse flags from the argument string before entering Phase 0.
 
 8. **Deduplication:**
    - Normalize each name: lowercase, trim whitespace.
-   - If two names match after normalization, keep the variant with the better reasoning score or richer metadata.
+   - If two names match after normalization, keep the variant with the higher `score` field. If scores are equal, keep the variant with more non-empty fields in `score_breakdown`.
    - Preserve the original casing of the kept variant.
 
 9. Save the merged, deduplicated list to `.claude/namer-outputs/names-merged.json`.
@@ -313,7 +323,7 @@ State is persisted to `.claude/namer-state.json` and updated at every phase tran
 {
   "session_id": "namer-YYYY-MM-DD-HHMM",
   "started_at": "ISO timestamp",
-  "phase": "brief|strategy-selection|generation|validation|reporting|review|complete",
+  "phase": "strategy-selection|generation|validation|reporting|review|complete",
   "brief_path": ".claude/namer-briefs/brief-{session_id}.json",
   "strategies_selected": ["neologisms", "compound-words"],
   "agents_spawned": 0,

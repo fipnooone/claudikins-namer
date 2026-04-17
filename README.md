@@ -6,23 +6,17 @@
 
 <h1 align="center">Claudikins Namer</h1>
 
-<p align="center"><strong>Because "BrandNameGPT-Ultra-Pro-Max" was, ironically, a terrible name.</strong></p>
-
-<p align="center"><em>A brand naming pipeline powered by a squad of opinionated AI agents.</em></p>
+<p align="center"><em>A brand naming pipeline for Claude Code. Multiple strategies, real validation, ranked results.</em></p>
 
 ---
 
 ## Why?
 
-**You asked Claude for a brand name. He gave you "SynergyFlow".**
+Ask an LLM for a brand name and you'll get "SynergyFlow". Ask for 20 options and you'll get 20 variations of the same root with different suffixes. The problem isn't creativity - it's approach.
 
-**You asked for something creative. He suggested "InnovateTech Solutions" and called it a day.**
+claudikins-namer runs multiple naming strategies in parallel, validates candidates against real data (domain availability, social handles, SEO, cultural fit), and produces a ranked report. Structure in, better names out.
 
-**You asked for 20 options. He gave you 20 variations of the same word with different suffixes.**
-
-claudikins-namer treats naming like a proper creative process. Multiple strategies running in parallel, real domain checks, cultural screening across languages, and a final report that actually helps you decide - not just a list of words that sound vaguely corporate.
-
-> **Good names don't come from one angle.** They come from exploring many angles and validating the survivors.
+> **Good names don't come from one angle.** They come from exploring many and validating the survivors.
 
 ---
 
@@ -70,12 +64,12 @@ Restart Claude Code. Then:
 
 ## Meet the Team
 
-| Agent                | Role        | Personality                                                                                                                                                              |
-| -------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **brand-strategist** | Interviewer | The brand consultant. Asks the right questions, picks the right strategies. Knows that "fun and professional" isn't a contradiction - it's a brief.                      |
-| **name-crafter**     | Generator   | The creative. Gets one strategy, obsesses over it, produces 5-8 polished candidates. Runs in parallel - four of them brainstorming independently.                        |
-| **name-validator**   | Checker     | The realist. Checks if your perfect name has an available .com, whether someone already has that Twitter handle, and if it means something unfortunate in Portuguese.    |
-| **brand-reporter**   | Analyst     | The strategist. Takes raw candidates and validation data, produces a ranked report with phonetic analysis across 10 languages. The one who tells you _why_ a name works. |
+| Agent                | Role        | Personality                                                                                                                               |
+| -------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **brand-strategist** | Interviewer | Conducts the naming brief. Asks about product, audience, tone, constraints - then selects the right strategies.                           |
+| **name-crafter**     | Generator   | One strategy, full focus, 5-8 polished candidates. Runs in parallel - up to four instances brainstorming independently.                   |
+| **name-validator**   | Checker     | Domain availability, social handles, SEO, cultural screening. Uses real checks where possible, marks "unchecked" where not. No fake data. |
+| **brand-reporter**   | Analyst     | Produces a ranked report with phonetic analysis across 10 languages. Explains _why_ a name works, not just that it scored well.           |
 
 ---
 
@@ -223,5 +217,3 @@ Without `tool-executor`, the pipeline still works - validation just marks MCP-de
 MIT
 
 ---
-
-<p align="center"><em>Because "BrandNameGPT-Ultra-Pro-Max" was, ironically, a terrible name.</em></p>

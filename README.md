@@ -181,17 +181,16 @@ MCP tools (via `claudikins-tool-executor`) are optional. Without them, social ch
 ### System
 
 - **jq** - JSON processing in hook scripts
-- **python3** - Dedup merge logic in capture hooks
 
 ```bash
 # macOS
-brew install jq python3
+brew install jq
 
 # Ubuntu/Debian
-sudo apt install jq python3
+sudo apt install jq
 
 # Windows
-winget install jqlang.jq Python.Python.3
+winget install jqlang.jq
 ```
 
 ### Recommended Plugins

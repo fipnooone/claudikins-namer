@@ -39,39 +39,60 @@ if [ -f "$STATE_FILE" ]; then
     SESSION_ID=$(jq -r '.session_id // "unknown"' "$STATE_FILE")
 fi
 
-# Try to extract validation output from transcript
+# Extract last JSON block containing "validated_at" and "names" from transcript.
+# Uses the same brace-counting approach as capture-names.sh.
+extract_json_block() {
+    local file="$1"
+    local field1="$2"
+    local field2="$3"
+    local result=""
+    local buffer=""
+    local depth=0
+    local in_block=false
+
+    while IFS= read -r line; do
+        if [ "$in_block" = false ]; then
+            if echo "$line" | grep -q '{'; then
+                in_block=true
+                buffer="$line"
+                local opens closes
+                opens=$(echo "$line" | tr -cd '{' | wc -c | tr -d ' ')
+                closes=$(echo "$line" | tr -cd '}' | wc -c | tr -d ' ')
+                depth=$((opens - closes))
+            fi
+        else
+            buffer="$buffer
+$line"
+            local opens closes
+            opens=$(echo "$line" | tr -cd '{' | wc -c | tr -d ' ')
+            closes=$(echo "$line" | tr -cd '}' | wc -c | tr -d ' ')
+            depth=$((depth + opens - closes))
+        fi
+
+        if [ "$in_block" = true ] && [ "$depth" -le 0 ]; then
+            if echo "$buffer" | jq -e "select(has(\"$field1\") and has(\"$field2\"))" >/dev/null 2>&1; then
+                result="$buffer"
+            fi
+            in_block=false
+            buffer=""
+            depth=0
+        fi
+    done < "$file"
+
+    echo "$result"
+}
+
 VALIDATION_OUTPUT=""
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Extract the last JSON block that contains "validated_at" and "names" fields
-    VALIDATION_OUTPUT=$(python3 -c "
-import sys, json, re
-
-text = open(sys.argv[1]).read()
-blocks = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text)
-result = ''
-for block in reversed(blocks):
-    try:
-        obj = json.loads(block)
-        if 'validated_at' in obj and 'names' in obj:
-            result = block
-            break
-    except:
-        pass
-print(result)
-" "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
+    VALIDATION_OUTPUT=$(extract_json_block "$TRANSCRIPT_PATH" "validated_at" "names")
 fi
 
 # If no structured output found, create a basic record
 if [ -z "$VALIDATION_OUTPUT" ]; then
-    VALIDATION_OUTPUT=$(cat <<EOF
-{
-  "validated_at": "${TIMESTAMP}",
-  "names": [],
-  "note": "Output not captured - check transcript",
-  "transcript_path": "${TRANSCRIPT_PATH}"
-}
-EOF
-)
+    VALIDATION_OUTPUT=$(jq -n \
+        --arg validated_at "$TIMESTAMP" \
+        --arg transcript "$TRANSCRIPT_PATH" \
+        '{validated_at: $validated_at, names: [], note: "Output not captured - check transcript", transcript_path: $transcript}')
 fi
 
 # Backup first (per A-6 pattern)

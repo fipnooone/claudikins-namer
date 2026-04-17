@@ -35,46 +35,64 @@ TIMESTAMP_EPOCH=$(date +%s)
 # Create output directory if needed
 mkdir -p "$NAMES_DIR"
 
-# Try to extract names output from transcript
+# Extract last JSON block containing "strategy" and "names" from transcript.
+# Scans the transcript for lines containing opening braces, accumulates lines
+# until valid JSON is formed, and keeps the last match with required fields.
+extract_json_block() {
+    local file="$1"
+    local field1="$2"
+    local field2="$3"
+    local result=""
+    local buffer=""
+    local depth=0
+    local in_block=false
+
+    while IFS= read -r line; do
+        if [ "$in_block" = false ]; then
+            # Look for a line containing opening brace
+            if echo "$line" | grep -q '{'; then
+                in_block=true
+                buffer="$line"
+                # Count braces
+                local opens closes
+                opens=$(echo "$line" | tr -cd '{' | wc -c | tr -d ' ')
+                closes=$(echo "$line" | tr -cd '}' | wc -c | tr -d ' ')
+                depth=$((opens - closes))
+            fi
+        else
+            buffer="$buffer
+$line"
+            local opens closes
+            opens=$(echo "$line" | tr -cd '{' | wc -c | tr -d ' ')
+            closes=$(echo "$line" | tr -cd '}' | wc -c | tr -d ' ')
+            depth=$((depth + opens - closes))
+        fi
+
+        if [ "$in_block" = true ] && [ "$depth" -le 0 ]; then
+            # Try to parse as JSON with required fields
+            if echo "$buffer" | jq -e "select(has(\"$field1\") and has(\"$field2\"))" >/dev/null 2>&1; then
+                result="$buffer"
+            fi
+            in_block=false
+            buffer=""
+            depth=0
+        fi
+    done < "$file"
+
+    echo "$result"
+}
+
 NAMES_OUTPUT=""
 if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-    # Extract the last JSON block that contains "strategy" and "names" fields
-    NAMES_OUTPUT=$(grep -o '{[^}]*"strategy"[^}]*"names"[^}]*}' "$TRANSCRIPT_PATH" | \
-        tail -1 || echo "")
-
-    # If simple grep didn't work, try extracting larger JSON blocks
-    if [ -z "$NAMES_OUTPUT" ]; then
-        NAMES_OUTPUT=$(python3 -c "
-import sys, json, re
-
-text = open(sys.argv[1]).read()
-# Find all JSON-like blocks
-blocks = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text)
-result = ''
-for block in reversed(blocks):
-    try:
-        obj = json.loads(block)
-        if 'strategy' in obj and 'names' in obj:
-            result = block
-            break
-    except:
-        pass
-print(result)
-" "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
-    fi
+    NAMES_OUTPUT=$(extract_json_block "$TRANSCRIPT_PATH" "strategy" "names")
 fi
 
 # If no structured output found, create a basic record
 if [ -z "$NAMES_OUTPUT" ]; then
-    NAMES_OUTPUT=$(cat <<EOF
-{
-  "strategy": "unknown",
-  "names": [],
-  "note": "Output not captured - check transcript",
-  "transcript_path": "${TRANSCRIPT_PATH}"
-}
-EOF
-)
+    TRANSCRIPT_ESCAPED=$(printf '%s' "$TRANSCRIPT_PATH" | jq -Rs '.')
+    NAMES_OUTPUT=$(jq -n \
+        --arg transcript "$TRANSCRIPT_PATH" \
+        '{strategy: "unknown", names: [], note: "Output not captured - check transcript", transcript_path: $transcript}')
 fi
 
 # Extract strategy name
@@ -89,56 +107,49 @@ OUTPUT_FILE="$NAMES_DIR/${STRATEGY}.json"
 echo "$NAMES_OUTPUT" > "$OUTPUT_FILE"
 
 # --- DEDUP MERGE ---
-# Read all *.json (not .backup-*) from names directory and merge
-MERGE_SCRIPT=$(cat <<'PYEOF'
-import sys, json, os, glob
+# Read all non-backup *.json from names directory, collect all name entries,
+# deduplicate by lowercased name keeping the variant with the higher score,
+# and write the merged result to names-merged.json.
 
-names_dir = sys.argv[1]
-merged_file = sys.argv[2]
+# Collect all names from strategy files into a single array
+ALL_NAMES="[]"
+for f in "$NAMES_DIR"/*.json; do
+    [ -f "$f" ] || continue
+    basename=$(basename "$f")
+    # Skip backup files
+    case "$basename" in .backup-*) continue ;; esac
 
-all_names = []
-# Read all non-backup JSON files
-for fpath in sorted(glob.glob(os.path.join(names_dir, "*.json"))):
-    basename = os.path.basename(fpath)
-    if basename.startswith(".backup-"):
-        continue
-    try:
-        with open(fpath) as f:
-            data = json.load(f)
-        if "names" in data and isinstance(data["names"], list):
-            for name_entry in data["names"]:
-                if isinstance(name_entry, dict):
-                    all_names.append(name_entry)
-                elif isinstance(name_entry, str):
-                    all_names.append({"name": name_entry, "score": 0})
-    except Exception:
-        pass
+    # Extract .names array, normalize string entries to {name, score} objects
+    FILE_NAMES=$(jq -c '
+        .names // [] | map(
+            if type == "string" then {name: ., score: 0}
+            elif type == "object" then .
+            else empty
+            end
+        )
+    ' "$f" 2>/dev/null || echo "[]")
 
-# Deduplicate by lowercased name, keeping higher score variant
-seen = {}
-for entry in all_names:
-    name = entry.get("name", "")
-    key = name.lower()
-    score = entry.get("score", 0)
-    if key not in seen or score > seen[key].get("score", 0):
-        seen[key] = entry
+    ALL_NAMES=$(echo "$ALL_NAMES" | jq --argjson new "$FILE_NAMES" '. + $new')
+done
 
-deduped = list(seen.values())
+# Deduplicate: group by lowercased name, keep highest score
+DEDUPED=$(echo "$ALL_NAMES" | jq '
+    group_by(.name | ascii_downcase)
+    | map(sort_by(-.score) | first)
+')
 
-merged = {
-    "merged_at": sys.argv[3],
-    "source_count": len(glob.glob(os.path.join(names_dir, "*.json"))) - len(glob.glob(os.path.join(names_dir, ".backup-*.json"))),
-    "names": deduped
-}
+NAME_COUNT=$(echo "$DEDUPED" | jq 'length')
 
-with open(merged_file, "w") as f:
-    json.dump(merged, f, indent=2)
+# Count source files
+SOURCE_COUNT=$(ls "$NAMES_DIR"/*.json 2>/dev/null | grep -cv '\.backup-' || echo "0")
 
-print(len(deduped))
-PYEOF
-)
-
-NAME_COUNT=$(python3 -c "$MERGE_SCRIPT" "$NAMES_DIR" "$MERGED_FILE" "$TIMESTAMP" 2>/dev/null || echo "0")
+# Write merged file
+jq -n \
+    --arg merged_at "$TIMESTAMP" \
+    --argjson source_count "$SOURCE_COUNT" \
+    --argjson names "$DEDUPED" \
+    '{merged_at: $merged_at, source_count: $source_count, names: $names}' \
+    > "${MERGED_FILE}.tmp" && mv "${MERGED_FILE}.tmp" "$MERGED_FILE"
 
 # Update namer-state.json if it exists
 if [ -f "$STATE_FILE" ]; then

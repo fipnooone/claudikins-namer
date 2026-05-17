@@ -1,7 +1,7 @@
 ---
 name: claudikins-namer:brief
 description: "Interactive brand naming brief collection. Conducts interview, selects strategies, saves brief for /namer:run."
-argument-hint: [--resume SESSION_ID] [--list-sessions]
+argument-hint: "[--resume SESSION_ID] [--list-sessions]"
 allowed-tools:
   - Read
   - Grep

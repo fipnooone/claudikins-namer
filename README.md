@@ -6,7 +6,7 @@
 
 <h1 align="center">Claudikins Namer</h1>
 
-<p align="center"><em>A brand naming pipeline for Claude Code. Multiple strategies, real validation, ranked results.</em></p>
+<p align="center"><em>A brand naming pipeline for Claude Code and OpenClaude-compatible plugin runtimes. Multiple strategies, real validation, ranked results.</em></p>
 
 ---
 
@@ -53,7 +53,7 @@ claudikins-namer runs multiple naming strategies in parallel, validates candidat
 /plugin install claudikins-namer
 ```
 
-Restart Claude Code. Then:
+Restart Claude Code or OpenClaude. Then:
 
 ```bash
 # Start naming
@@ -205,7 +205,7 @@ Without `tool-executor`, the pipeline still works - validation just marks MCP-de
 
 ## Status
 
-**v0.1.0** - Initial Release.
+**v0.1.1** - Initial Release.
 
 [View the marketplace](https://github.com/fipnooone/claudikins-marketplace)
 
